@@ -9,7 +9,7 @@ from app.routers.blog import router as blog_router
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173","http://62.234.188.181"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

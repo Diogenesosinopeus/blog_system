@@ -1,6 +1,8 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { createBlog, deleteBlog, getBlog, getBlogs, login, register, updateBlog } from "./api";
 import type { Blog, BlogInput, RegisterInput } from "./types";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 type View = { name: "home" } | { name: "detail"; id: number } | { name: "editor"; id?: number } | { name: "login" } | { name: "register" };
 
@@ -123,7 +125,7 @@ function Detail({ id, token, onEdit }: { id: number; token: string; onEdit: (id:
       <a className="back" href="#/">← 返回文章列表</a>
       <p className="eyebrow">{formatDate(blog.created_at)}</p>
       <h1>{blog.title}</h1>
-      <div className="article-content">{blog.content}</div>
+      <div className="article-content"><ReactMarkdown remarkPlugins={[remarkGfm]}>{blog.content}</ReactMarkdown></div>
       {token && <div className="actions"><button onClick={() => onEdit(blog.id)}>编辑</button><button className="danger" onClick={remove}>删除</button></div>}
     </article>
   );
@@ -308,6 +310,8 @@ function Register({ onRegistered }: { onRegistered: () => void }) {
 function Editor({ id, token, onSaved }: { id?: number; token: string; onSaved: (id: number) => void }) {
   const [input, setInput] = useState<BlogInput>(emptyInput);
   const [error, setError] = useState("");
+  const contentRef = useRef<HTMLTextAreaElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (id) getBlog(id).then(blog => setInput({ title: blog.title, content: blog.content })).catch(errorValue => setError(errorValue.message));
@@ -324,11 +328,91 @@ function Editor({ id, token, onSaved }: { id?: number; token: string; onSaved: (
     }
   }
 
-  return <section className="page narrow form-page"><p className="eyebrow">{id ? "EDIT POST" : "NEW POST"}</p><h1>{id ? "编辑文章" : "写一篇文章"}</h1><form onSubmit={submit}>
-    <label>标题<input value={input.title} onChange={event => setInput({ ...input, title: event.target.value })} required /></label>
-    <label>正文<textarea rows={14} value={input.content} onChange={event => setInput({ ...input, content: event.target.value })} required /></label>
-    {error && <p className="error">{error}</p>}<button className="primary">保存文章</button>
-  </form></section>;
+  function insertMarkdown(before: string, after = "") {
+    const textarea = contentRef.current;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = input.content.slice(start, end) || "文字";
+    const nextContent = input.content.slice(0, start) + before + selected + after + input.content.slice(end);
+    setInput({ ...input, content: nextContent });
+    requestAnimationFrame(() => {
+      textarea.focus();
+      const cursor = start + before.length + selected.length + after.length;
+      textarea.setSelectionRange(cursor, cursor);
+    });
+  }
+
+  return (
+    <section className="editor-page">
+      <div className="editor-topbar">
+        <a className="editor-back" href="#/">← 返回</a>
+        <span className="editor-status">{id ? "编辑文章" : "新文章"}</span>
+        <button className="primary editor-save" type="button" onClick={() => formRef.current?.requestSubmit()}>
+          保存文章
+        </button>
+      </div>
+
+      <form ref={formRef} className="editor-workspace" onSubmit={submit}>
+        <aside className="editor-sidebar">
+          <p className="eyebrow">DIOGENES LAB</p>
+          <h2>写作空间</h2>
+          <p className="editor-sidebar-note">用 Markdown 记录想法，让内容保持清晰、自由和可读。</p>
+          <div className="editor-tip">
+            <strong>快捷提示</strong>
+            <span>使用工具栏快速插入 Markdown 格式。</span>
+          </div>
+        </aside>
+
+        <main className="editor-main">
+          <input
+            className="editor-title"
+            value={input.title}
+            onChange={event => setInput({ ...input, title: event.target.value })}
+            placeholder="输入文章标题"
+            aria-label="文章标题"
+            required
+          />
+
+          <div className="editor-toolbar" aria-label="Markdown 工具栏">
+            <button type="button" onClick={() => insertMarkdown("# ")} title="一级标题">H1</button>
+            <button type="button" onClick={() => insertMarkdown("## ")} title="二级标题">H2</button>
+            <span className="toolbar-divider" />
+            <button type="button" onClick={() => insertMarkdown("**", "**")} title="加粗">B</button>
+            <button type="button" onClick={() => insertMarkdown("*", "*")} title="斜体"><em>I</em></button>
+            <button type="button" onClick={() => insertMarkdown("- ")} title="无序列表">☷</button>
+            <button type="button" onClick={() => insertMarkdown("> ")} title="引用">❯</button>
+            <button type="button" onClick={() => insertMarkdown("```\n", "\n```")} title="代码块">&lt;/&gt;</button>
+            <button type="button" onClick={() => insertMarkdown("![图片描述](", ")")} title="图片">▧</button>
+            <span className="toolbar-spacer" />
+            <span className="markdown-label">Markdown</span>
+          </div>
+
+          <div className="editor-panels">
+            <div className="editor-input-panel">
+              <span className="panel-label">编辑</span>
+              <textarea
+                ref={contentRef}
+                value={input.content}
+                onChange={event => setInput({ ...input, content: event.target.value })}
+                placeholder="从这里开始写作……\n\n支持 Markdown、图片、代码块和列表。"
+                aria-label="文章正文"
+                required
+              />
+            </div>
+            <div className="editor-preview-panel">
+              <span className="panel-label">预览</span>
+              <article className="markdown-preview">
+                {input.content ? <ReactMarkdown remarkPlugins={[remarkGfm]}>{input.content}</ReactMarkdown> : <p className="preview-empty">输入内容后，这里会显示文章预览。</p>}
+              </article>
+            </div>
+          </div>
+
+          {error && <p className="error editor-error">{error}</p>}
+        </main>
+      </form>
+    </section>
+  );
 }
 
 function formatDate(value: string) {

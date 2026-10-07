@@ -53,5 +53,44 @@ input:focus, textarea:focus { border-color: #b44d32; box-shadow: 0 0 0 3px #b44d
 .form-hint { margin: -6px 0 0; color: #918b84; font-size: .85rem; line-height: 1.6; }
 .form-switch { margin: 0; color: #918b84; font-size: .9rem; text-align: center; }
 .form-switch a { color: #b44d32; font-weight: 700; }
+.editor-page { min-height: 100vh; background: #fbfaf8; }
+.editor-topbar { height: 72px; padding: 0 34px; display: flex; align-items: center; gap: 22px; border-bottom: 1px solid #e8e3dc; background: #fffdf9; }
+.editor-back { color: #b44d32; font-weight: 700; }
+.editor-status { color: #918b84; font-size: .9rem; }
+.editor-save { margin-left: auto; }
+.editor-workspace { max-width: 1440px; min-height: calc(100vh - 72px); margin: 0 auto; display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 0; }
+.editor-sidebar { padding: 42px 28px; border-right: 1px solid #e8e3dc; background: #f4f0ea; }
+.editor-sidebar h2 { margin: 10px 0 12px; font: 700 1.8rem Georgia, serif; }
+.editor-sidebar-note { color: #77736e; font-size: .9rem; line-height: 1.8; }
+.editor-tip { display: grid; gap: 8px; margin-top: 48px; padding-top: 20px; border-top: 1px solid #ddd5cb; color: #77736e; font-size: .82rem; line-height: 1.6; }
+.editor-tip strong { color: #202124; }
+.editor-main { padding: 46px clamp(22px, 6vw, 90px) 70px; }
+.editor-title { border: 0; background: transparent; padding: 0; font: 700 clamp(2.2rem, 5vw, 4.3rem)/1.1 Georgia, serif; letter-spacing: -.04em; color: #202124; }
+.editor-title:focus { box-shadow: none; }
+.editor-title::placeholder { color: #c6c0b8; }
+.editor-toolbar { min-height: 54px; margin-top: 36px; padding: 8px 0; display: flex; align-items: center; gap: 5px; border-top: 1px solid #e8e3dc; border-bottom: 1px solid #e8e3dc; }
+.editor-toolbar button { min-width: 32px; padding: 6px 8px; border: 0; background: transparent; color: #5e5a55; font-weight: 700; }
+.editor-toolbar button:hover { color: #b44d32; background: #b44d3210; border: 0; }
+.toolbar-divider { height: 22px; width: 1px; margin: 0 8px; background: #e2dcd4; }
+.toolbar-spacer { flex: 1; }
+.markdown-label, .panel-label { color: #918b84; font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; }
+.editor-panels { display: grid; grid-template-columns: 1fr 1fr; min-height: 530px; }
+.editor-input-panel, .editor-preview-panel { position: relative; padding-top: 22px; }
+.editor-input-panel { padding-right: 28px; border-right: 1px solid #e8e3dc; }
+.editor-preview-panel { padding-left: 28px; }
+.editor-input-panel textarea { min-height: 470px; margin-top: 16px; resize: vertical; border: 0; padding: 0; background: transparent; border-radius: 0; line-height: 1.9; font: 1.05rem/1.9 ui-monospace, SFMono-Regular, Consolas, monospace; }
+.editor-input-panel textarea:focus { box-shadow: none; }
+.markdown-preview { margin-top: 16px; color: #3c3935; line-height: 1.85; }
+.markdown-preview h1, .markdown-preview h2, .markdown-preview h3 { font-family: Georgia, serif; line-height: 1.25; }
+.markdown-preview h1 { font-size: 2rem; }
+.markdown-preview h2 { font-size: 1.5rem; }
+.markdown-preview img { display: block; max-width: 100%; height: auto; border-radius: 8px; }
+.markdown-preview pre { overflow-x: auto; padding: 16px; background: #2b2927; color: #f7f4ef; border-radius: 8px; }
+.markdown-preview code { padding: 2px 5px; background: #eee9e2; border-radius: 4px; }
+.markdown-preview pre code { padding: 0; background: transparent; }
+.markdown-preview blockquote { margin-left: 0; padding-left: 18px; border-left: 3px solid #b44d32; color: #77736e; }
+.preview-empty { color: #b4aea6; }
+.editor-error { margin-top: 28px; }
 @media (max-width: 600px) { .site-header { padding: 22px 18px; } .page { padding: 48px 18px; } nav { gap: 12px; } }
 @media (max-width: 760px) { .login-panel { grid-template-columns: 1fr; gap: 12px; } .login-copy { padding: 0; } .login-copy h1 { font-size: 3.2rem; } .login-form { padding: 26px 22px; } }
+@media (max-width: 900px) { .editor-workspace { grid-template-columns: 1fr; } .editor-sidebar { display: none; } .editor-main { padding: 32px 22px 52px; } .editor-panels { grid-template-columns: 1fr; } .editor-input-panel { padding-right: 0; border-right: 0; border-bottom: 1px solid #e8e3dc; padding-bottom: 30px; } .editor-preview-panel { padding-left: 0; padding-top: 30px; } }
