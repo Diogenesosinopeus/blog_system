@@ -1,6 +1,7 @@
 import type { Blog, BlogInput, RegisterInput, TokenResponse } from "./types";
 
-const API_URL = "/api";
+// 本地开发使用 Vite 代理；部署时可通过 VITE_API_URL 指向线上后端。
+const API_URL = import.meta.env.VITE_API_URL ?? "/api";
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     ...options,

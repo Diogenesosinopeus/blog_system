@@ -3,8 +3,9 @@ import { createBlog, deleteBlog, getBlog, getBlogs, login, register, updateBlog 
 import type { Blog, BlogInput, RegisterInput } from "./types";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import FocusWorkspace from "./components/FocusWorkspace";
 
-type View = { name: "home" } | { name: "detail"; id: number } | { name: "editor"; id?: number } | { name: "login" } | { name: "register" };
+type View = { name: "home" } | { name: "detail"; id: number } | { name: "editor"; id?: number } | { name: "login" } | { name: "register" } | { name: "focus" };
 
 const emptyInput: BlogInput = { title: "", content: "" };
 
@@ -13,6 +14,7 @@ function readView(): View {
   if (hash === "#login") return { name: "login" };
   if (hash === "#register") return { name: "register" };
   if (hash === "#new") return { name: "editor" };
+  if (hash === "#focus") return { name: "focus" };
   const detail = hash.match(/^#blog\/(\d+)$/);
   if (detail) return { name: "detail", id: Number(detail[1]) };
   const edit = hash.match(/^#edit\/(\d+)$/);
@@ -51,6 +53,7 @@ export default function App() {
         <a className="brand" href="#/">我的博客</a>
         <nav>
           <a href="#/">首页</a>
+          <a href="#focus">专注模式</a>
           {token ? (
             <>
               <a href="#new">写文章</a>
@@ -66,6 +69,7 @@ export default function App() {
         {view.name === "login" && <Login onLogin={value => { saveToken(value); navigate("#/"); }} />}
         {view.name === "register" && <Register onRegistered={() => navigate("#login")} />}
         {view.name === "editor" && <Editor id={view.id} token={token} onSaved={id => navigate(`#blog/${id}`)} />}
+        {view.name === "focus" && <FocusPage token={token} />}
       </main>
     </div>
   );
@@ -80,23 +84,42 @@ function Home({ onOpen }: { onOpen: (id: number) => void }) {
   }, []);
 
   return (
-    <section className="page narrow">
-      <p className="eyebrow">PERSONAL NOTES</p>
-      <h1>记录想法，分享生活。</h1>
-      <p className="intro">这是一个由我维护的个人博客。</p>
-      {error && <p className="error">{error}</p>}
-      <div className="post-list">
-        {blogs.length === 0 && !error && <p className="muted">还没有文章。</p>}
-        {blogs.map(blog => (
-          <article className="post-card" key={blog.id} onClick={() => onOpen(blog.id)}>
-            <time>{formatDate(blog.created_at)}</time>
-            <h2>{blog.title}</h2>
-            <p>{blog.content.slice(0, 150)}{blog.content.length > 150 ? "…" : ""}</p>
-          </article>
-        ))}
+    <section className="page home-layout">
+      <div className="home-hero">
+        <div className="home-copy">
+          <p className="eyebrow">PERSONAL NOTES / 2026</p>
+          <h1>记录想法，<br />分享生活。</h1>
+          <p className="intro">一个关于学习、构建和日常思考的个人空间。</p>
+          <a className="hero-link" href="#writing">向下阅读 <span>↓</span></a>
+        </div>
       </div>
+      <section className="writing-section" id="writing">
+        <div className="section-heading">
+          <div>
+            <span className="section-kicker">LATEST WRITING</span>
+            <h2>最近的文章</h2>
+          </div>
+          <span className="section-count">{blogs.length} 篇</span>
+        </div>
+        {error && <p className="error">{error}</p>}
+        <div className="post-list">
+          {blogs.length === 0 && !error && <p className="muted">还没有文章。</p>}
+          {blogs.map(blog => (
+            <article className="post-card" key={blog.id} onClick={() => onOpen(blog.id)}>
+              <time>{formatDate(blog.created_at)}</time>
+              <h2>{blog.title}</h2>
+              <p>{blog.content.slice(0, 150)}{blog.content.length > 150 ? "…" : ""}</p>
+              <span className="read-more">阅读文章 →</span>
+            </article>
+          ))}
+        </div>
+      </section>
     </section>
   );
+}
+
+function FocusPage({ token }: { token: string }) {
+  return <FocusWorkspace token={token} />;
 }
 
 function Detail({ id, token, onEdit }: { id: number; token: string; onEdit: (id: number) => void }) {
